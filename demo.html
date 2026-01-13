@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Voice Recognition Test</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+    #output {
+      font-size: 22px;
+      font-weight: bold;
+      color: green;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🎤 Voice Recognition Test</h2>
+
+<div id="output">Say something...</div>
+
+<button onclick="start()">▶ Start Listening</button>
+<button onclick="stop()">⏹ Stop</button>
+
+<script>
+  let recognition;
+
+  function start() {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert("Speech Recognition not supported. Use Chrome.");
+      return;
+    }
+
+    recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-IN";      // Indian English
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+      let text = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        text += event.results[i][0].transcript;
+      }
+      document.getElementById("output").innerText = text;
+    };
+
+    recognition.start();
+  }
+
+  function stop() {
+    if (recognition) recognition.stop();
+  }
+</script>
+
+</body>
+</html>
