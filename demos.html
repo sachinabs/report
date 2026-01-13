@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Medical Voice Demo – RAD Report</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .log {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f4f4f4;
+      height: 120px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    textarea, input {
+      width: 95%;
+    }
+    section {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🎤 Medical Voice Report Demo</h2>
+<p><b>Demo only:</b> Voice assists form filling. Doctor must verify.</p>
+
+<button onclick="startListening()">🎙 Start Dictation</button>
+<button onclick="stopListening()">⏹ Stop</button>
+
+<div class="log" id="log"></div>
+
+<hr />
+
+<!-- ====== RAD REPORT (SIMPLIFIED FROM YOUR TEMPLATE) ====== -->
+
+<section>
+  <h3>Procedure Information</h3>
+  <label>Exam</label>
+  <textarea id="procedureInformationText"></textarea>
+
+  <label>Technique</label>
+  <textarea id="TEXT_1619606121251"></textarea>
+</section>
+
+<section>
+  <h3>Findings – Renal Mass</h3>
+
+  <label>Description</label>
+  <textarea id="TEXT_1619606121259"></textarea>
+
+  <label>Location</label><br/>
+  <input type="radio" name="kidney" id="rightKidney" checked /> Right Kidney
+  <input type="radio" name="kidney" id="leftKidney" /> Left Kidney
+
+  <br/><br/>
+  <label>Size</label>
+  <textarea id="TEXT_1619606121261"></textarea>
+</section>
+
+<section>
+  <h3>Impression</h3>
+  <input type="text" id="TEXT_1624991702060" />
+</section>
+
+<script>
+  let recognition;
+  let listening = false;
+
+  const logBox = document.getElementById("log");
+
+  function log(text) {
+    logBox.innerHTML += text + "<br/>";
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function startListening() {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert("Speech Recognition not supported. Use Chrome.");
+      return;
+    }
+
+    recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+      log("🗣 " + transcript);
+      handleSpeech(transcript);
+    };
+
+    recognition.start();
+    listening = true;
+    log("🎤 Listening...");
+  }
+
+  function stopListening() {
+    if (recognition && listening) {
+      recognition.stop();
+      listening = false;
+      log("⏹ Stopped");
+    }
+  }
+
+  // ===== KEYWORD → FIELD MAPPING =====
+  function handleSpeech(text) {
+
+    // Exam
+    if (text.includes("exam")) {
+      document.getElementById("procedureInformationText").value = text;
+    }
+
+    // Technique
+    if (text.includes("contrast")) {
+      document.getElementById("TEXT_1619606121251").value = "MRI performed with contrast";
+    }
+
+    // Kidney side
+    if (text.includes("right kidney")) {
+      document.getElementById("rightKidney").checked = true;
+    }
+    if (text.includes("left kidney")) {
+      document.getElementById("leftKidney").checked = true;
+    }
+
+    // Renal mass description
+    if (text.includes("renal mass")) {
+      document.getElementById("TEXT_1619606121259").value = text;
+    }
+
+    // Size detection (basic demo logic)
+    if (text.includes("centimeter") || text.includes("cm")) {
+      document.getElementById("TEXT_1619606121261").value = text;
+    }
+
+    // Impression
+    if (text.includes("impression") || text.includes("suggest") || text.includes("suspicious")) {
+      document.getElementById("TEXT_1624991702060").value = text;
+    }
+  }
+</script>
+
+</body>
+</html>
